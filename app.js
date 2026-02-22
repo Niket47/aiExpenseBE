@@ -18,7 +18,7 @@ app.use(async (req, res, next) => {
 app.use(logger)
 app.use(cors({ origin: "*" }));
 app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
     console.log("Incoming request body:-->", req.body);
@@ -27,6 +27,14 @@ app.use((req, res, next) => {
 
 import config from "./src/config/config.js";
 import router from "./src/routes/index.route.js";
+
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "AI Expense API is running correctly!",
+        environment: process.env.NODE_ENV || "development"
+    });
+});
 
 app.use("/api/v1", router)
 

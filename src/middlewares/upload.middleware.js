@@ -10,7 +10,9 @@ const __dirname = dirname(__filename);
 // Storage configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../uploads/')); // Ensure 'uploads/' folder exists
+        // Use /tmp for serverless environments (like Vercel) which are read-only
+        const dir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '../uploads/');
+        cb(null, dir);
     },
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
