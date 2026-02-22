@@ -7,8 +7,8 @@
   "type": "module",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node init && node app.js",
+    "dev": "node init && nodemon app.js"
   },
   "dependencies": {
     "@google/genai": "^1.42.0",
@@ -17,6 +17,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "google-auth-library": "^10.5.0",
     "helmet": "^8.0.0",
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.2",
