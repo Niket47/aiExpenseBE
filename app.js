@@ -1,9 +1,19 @@
 import express from "express";
 import cors from "cors";
-import './src/config/db.config.js';
+import { connectDB } from "./src/config/db.config.js";
 import logger from "./src/middlewares/logger.middleware.js";
 
 const app = express();
+
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        console.error("DB Connection Error:", error);
+        res.status(500).json({ success: false, message: "Database connection failed" });
+    }
+});
 
 app.use(logger)
 app.use(cors({ origin: "*" }));
