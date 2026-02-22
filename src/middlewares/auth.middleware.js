@@ -11,7 +11,7 @@ const authenticate = async (req, res, next) => {
 
         const token = authHeader.split(" ")[1];
 
-        const decoded = jwt.verify(token, "expenseappjwt");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded; // Add decoded token data to req.user
 
         next(); // Proceed to the next middleware or controller

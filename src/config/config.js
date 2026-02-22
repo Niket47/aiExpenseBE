@@ -7,9 +7,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default {
-    port: 3001,
+    port: process.env.PORT,
     database: {
-        url: "mongodb://127.0.0.1:27017/expenseapp",
+        url: process.env.DB_URL,
     },
     bcrypt: {
         salt: 10,

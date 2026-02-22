@@ -49,18 +49,27 @@ const addExpense = async (req, res) => {
 
 const getExpenses = async (req, res) => {
     try {
+        const search = req.query.search || "";
         const page = parseInt(req.query.page) || 1;     // default page 1
         const limit = parseInt(req.query.limit) || 10;  // default 10 items
 
         const skip = (page - 1) * limit;
 
+        const query = { userId: req.user.id };
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { category: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+            ];
+        }
+
         const [expenses, total] = await Promise.all([
-            Expense.find({ userId: req.user.id })  // IMPORTANT → user specific
+            Expense.find(query)  // IMPORTANT → user specific
                 .sort({ date: -1 })                // newest first (optional)
                 .skip(skip)
                 .limit(limit),
-
-            Expense.countDocuments({ userId: req.user.id })
+            Expense.countDocuments(query)
         ]);
 
         res.status(200).json({
@@ -96,13 +105,18 @@ const getExpenseById = async (req, res) => {
 
 const updateExpense = async (req, res) => {
     try {
-        const [updated] = await Expense.update(req.body, {
-            where: { id: req.params.id },
-        });
+        const id = req.params.id
+        if (!id) {
+            return errorResponse(res, 'Expense ID is required', 400);
+        }
+        const expense = await Expense.findById(id);
+        if (!expense) return errorResponse(res, 'Expense not found', 404);
 
-        if (!updated) return res.status(404).json({ message: "Expense not found" });
+        const updated = await Expense.findByIdAndUpdate(id, req.body, { new: true });
 
-        const updatedExpense = await Expense.findById(req.params.id);
+        if (!updated) return errorResponse(res, 'Expense not found', 404);
+
+        const updatedExpense = await Expense.findById(id);
         res.status(200).json({ message: "Expense updated", data: updatedExpense });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -111,9 +125,14 @@ const updateExpense = async (req, res) => {
 
 const deleteExpense = async (req, res) => {
     try {
-        const deleted = await Expense.destroy({
-            where: { id: req.params.id },
-        });
+        const id = req.params.id
+        if (!id) {
+            return errorResponse(res, 'Expense ID is required', 400);
+        }
+        const expense = await Expense.findById(id);
+        if (!expense) return res.status(404).json({ message: "Expense not found" });
+
+        const deleted = await Expense.findByIdAndDelete(id);
 
         if (!deleted) return res.status(404).json({ message: "Expense not found" });
 
@@ -127,6 +146,8 @@ const deleteExpense = async (req, res) => {
 const expenseController = {
     addExpense,
     getExpenses,
-    getExpenseById
+    getExpenseById,
+    updateExpense,
+    deleteExpense
 }
 export default expenseController
