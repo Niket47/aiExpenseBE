@@ -79,8 +79,8 @@ const logInUser = async (req, res) => {
                 id: user.id,
                 email: user.email,
             },
-            "expenseappjwt",
-            // { expiresIn: '7d' } // Token expires in 7 days
+            process.env.JWT_SECRET,
+            // { expiresIn: '7d' }
         );
 
         // Optional: Exclude password from returned user object
@@ -112,10 +112,57 @@ const getUserById = async (req, res) => {
 };
 
 
+const googleLogin = async (req, res) => {
+    try {
+        const { idToken } = req.body;
+
+        if (!idToken) {
+            return res.status(400).json({ message: "Missing Google token" });
+        }
+
+        const googleUser = await verifyGoogleToken(idToken);
+
+        const { email, name, picture, sub } = googleUser;
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            user = await User.create({
+                email,
+                name,
+                // avatar: picture,
+                googleId: sub,
+                authProvider: "google",
+            });
+        }
+
+        const appToken = jwt.sign(
+            {
+                id: user.id,
+                email: user.email,
+            },
+            process.env.JWT_SECRET,
+            // { expiresIn: '7d' }
+        );
+
+        return successResponse(res, 'Login successful', {
+            token: appToken,
+            user,
+        }, 200);
+
+    } catch (error) {
+        console.error("GOOGLE LOGIN ERROR:", error);
+        return errorResponse(res, error.message, 500);
+    }
+};
+
+
+
 
 const userController = {
     createUser,
     logInUser,
-    getUserById
+    getUserById,
+    googleLogin
 }
 export default userController
