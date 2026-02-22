@@ -1,10 +1,11 @@
-// import cloudinary from "../config/cloudConfig.js";
+import cloudinary from "../config/cloudConfig.js";
+import { errorResponse, successResponse } from "../helpers/response.js";
 
 
-const uploadProfile = async (req, res) => {
+const uploadImage = async (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).json({ message: 'No file uploaded' });
+            return errorResponse(res, 'No file uploaded', 400);
         }
         const profileData = {
             filename: req.file.filename,
@@ -12,25 +13,21 @@ const uploadProfile = async (req, res) => {
             mimetype: req.file.mimetype,
         };
 
-        // const imageUploadResult = await cloudinary.uploader.upload(profileData.path);
+        const imageUploadResult = await cloudinary.uploader.upload(profileData.path, { folder: "aiExpense" });
 
-        return res.status(200).json({
-            message: 'Profile uploaded successfully',
-            data: {
-                local: profileData,
-                // url: imageUploadResult?.url
-            },
-        });
+        const message = 'Profile uploaded successfully';
+        const data = {
+            // local: profileData,
+            url: imageUploadResult?.url
+        }
+        return successResponse(res, message, data, 201);
 
     } catch (error) {
-        return res.status(500).json({
-            message: 'Server error',
-            error: error.message,
-        });
+        return errorResponse(res, 'Server error', error.message, 500);
     }
 };
 
 const uploadController = {
-    uploadProfile
+    uploadImage
 }
 export default uploadController

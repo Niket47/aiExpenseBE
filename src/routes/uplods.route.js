@@ -4,7 +4,7 @@ import uploadController from "../controllers/image.controller.js";
 
 const router = Router()
 
-router.post("/uploads", upload.single('avatar'), uploadController.uploadProfile)
+router.post("/uploads", upload.single('image'), uploadController.uploadImage)
 
 export default router;
 

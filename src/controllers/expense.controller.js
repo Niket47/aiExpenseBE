@@ -112,7 +112,16 @@ const updateExpense = async (req, res) => {
         const expense = await Expense.findById(id);
         if (!expense) return errorResponse(res, 'Expense not found', 404);
 
-        const updated = await Expense.findByIdAndUpdate(id, req.body, { new: true });
+        const updateData = {
+            title: req.body.title,
+            amount: req.body.amount,
+            category: req.body.category,
+            description: req.body.description,
+            date: req.body.date,
+            userId: req.user.id,
+        }
+
+        const updated = await Expense.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!updated) return errorResponse(res, 'Expense not found', 404);
 
